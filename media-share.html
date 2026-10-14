@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陈嘉的个人作品</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-soft: #171a23;
+    --card: #1c2030;
+    --card-hover: #232840;
+    --border: #2a3045;
+    --text: #e8eaf2;
+    --text-dim: #8b91a7;
+    --accent: #6c8cff;
+    --accent-2: #9d6cff;
+    --danger: #ff5c7a;
+    --ok: #3ddc97;
+    --radius: 14px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(1200px 600px at 20% -10%, #1d2340 0%, var(--bg) 55%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  header { padding: 28px 0 12px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .logo h1 { font-size: 20px; font-weight: 700; letter-spacing: .5px; }
+  .logo p { font-size: 12px; color: var(--text-dim); }
+
+  .room-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 12px; padding: 8px 10px;
+  }
+  .room-box label { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+  .btn {
+    border: none; cursor: pointer; border-radius: 9px;
+    padding: 8px 14px; font-size: 13px; font-weight: 600;
+    color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    transition: transform .12s, opacity .12s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: .92; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn.ghost { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+
+  .share-tip {
+    margin-top: 14px; font-size: 13px; color: var(--text-dim);
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .share-tip .tip-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .share-tip .tip-label { font-size: 12px; color: var(--text-dim); white-space: nowrap; min-width: 62px; }
+  .share-tip .link {
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+    color: var(--accent); word-break: break-all; flex: 1; min-width: 200px;
+  }
+
+  /* 上传区 */
+  .dropzone {
+    margin-top: 22px;
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 38px 20px; text-align: center; cursor: pointer;
+    transition: border-color .2s, background .2s;
+    background: rgba(255,255,255,.015);
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: rgba(108,140,255,.06); }
+  .dropzone .icon { font-size: 40px; margin-bottom: 10px; }
+  .dropzone h3 { font-size: 16px; margin-bottom: 6px; }
+  .dropzone p { font-size: 13px; color: var(--text-dim); }
+
+  /* 上传进度 */
+  .upload-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .upload-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; font-size: 13px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .upload-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .upload-item .row-close {
+    background: transparent; border: none; color: var(--text-dim); cursor: pointer;
+    font-size: 13px; padding: 2px 6px; border-radius: 6px; flex: none;
+  }
+  .upload-item .row-close:hover { color: var(--text); background: var(--border); }
+  .upload-item .status { color: var(--text-dim); font-size: 12px; white-space: nowrap; }
+  .upload-item .status.ok { color: var(--ok); }
+  .upload-item .status.err { color: var(--danger); }
+  .bar { width: 120px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .2s; }
+
+  /* 工具栏 */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin: 30px 0 14px; flex-wrap: wrap; gap: 10px; }
+  .toolbar h2 { font-size: 17px; }
+  .toolbar .count { color: var(--text-dim); font-size: 13px; margin-left: 8px; }
+  .toolbar .storage { font-size: 12px; color: var(--text-dim); margin-left: 10px; }
+  .toolbar .storage.warn { color: #ffb648; }
+  .toolbar .storage.full { color: var(--danger); font-weight: 600; }
+
+  /* 网格 */
+  .grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; cursor: pointer;
+    transition: transform .15s, border-color .15s, background .15s;
+    position: relative;
+  }
+  .card:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--card-hover); }
+  .card .thumb {
+    height: 140px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg-soft); overflow: hidden; position: relative;
+  }
+  .card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .card .thumb .type-icon { font-size: 40px; opacity: .8; }
+  .card .badge {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,.55); color: #fff; font-size: 11px;
+    padding: 2px 8px; border-radius: 20px; backdrop-filter: blur(4px);
+  }
+  .card .meta { padding: 10px 12px 12px; }
+  .card .meta .fname { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card .meta .fpath { font-size: 11px; color: var(--text-dim); opacity: .7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+  .card .meta .finfo { font-size: 11px; color: var(--text-dim); margin-top: 4px; display: flex; justify-content: space-between; }
+  .card .del, .card .edit, .card .cover, .card .reframe {
+    position: absolute; bottom: 52px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(0,0,0,.55); border: none; color: #fff; cursor: pointer;
+    font-size: 13px; opacity: 0; transition: opacity .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card .del { right: 8px; }
+  .card .edit { right: 44px; }
+  .card .cover { right: 80px; }
+  .card .reframe { right: 116px; }
+  .card:hover .del, .card:hover .edit, .card:hover .cover, .card:hover .reframe { opacity: 1; }
+  /* 还没有封面的视频：按钮常显，方便直接设置 */
+  .card.need-cover .cover, .card.need-cover .reframe { opacity: 1; }
+  .card .del:hover { background: var(--danger); }
+  .card .edit:hover { background: var(--accent); }
+  .card .cover:hover { background: var(--ok); color: #10131b; }
+  .card .reframe:hover { background: #ffb648; color: #10131b; }
+
+  .empty { text-align: center; padding: 70px 0; color: var(--text-dim); }
+  .empty .icon { font-size: 54px; margin-bottom: 14px; }
+
+  /* 弹窗 */
+  .modal {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(5,7,12,.9); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+    padding: 24px;
+  }
+  .modal.show { display: flex; }
+  .modal img, .modal video { max-width: 92vw; max-height: 76vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+  .modal audio { width: min(560px, 90vw); }
+  .modal .caption { color: var(--text-dim); font-size: 13px; }
+  .modal .close {
+    position: absolute; top: 18px; right: 22px;
+    background: none; border: none; color: #fff; font-size: 30px; cursor: pointer;
+  }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 11px 20px; border-radius: 12px; font-size: 13px;
+    opacity: 0; transition: all .25s; z-index: 200; pointer-events: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .loading { text-align: center; color: var(--text-dim); font-size: 13px; padding: 30px 0; }
+  .version { text-align: center; color: #3c4358; font-size: 11px; margin-top: 36px; }
+
+  /* ===== 访客平铺流：图片/视频按原始比例整宽展示，不压缩 ===== */
+  .grid.feed { display: flex; flex-direction: column; gap: 18px; }
+  .feed-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .feed-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 10px 14px; font-size: 12px; color: var(--text-dim);
+  }
+  .feed-head .feed-title { font-size: 14px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .feed-head .feed-sub { white-space: nowrap; }
+  .media-wrap {
+    position: relative; background: #0a0c12;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100px; overflow: hidden;
+  }
+  /* 媒体加载完成后容器切成块级：flex 里百分比宽度会被折叠成默认尺寸 */
+  .media-wrap.has-media { display: block; }
+  .media-wrap img.full, .media-wrap img.placeholder { width: 100%; height: auto; display: block; }
+  .media-wrap img.placeholder { filter: blur(14px); transform: scale(1.03); }
+  /* 视频预览图：访客界面要清晰展示（不能用模糊占位样式） */
+  .media-wrap img.video-cover { width: auto; max-width: 100%; height: auto; display: block; }
+  /* 访客界面的视频窗口：收窄居中，且窗口按封面实际尺寸收缩，绝不放大小图导致模糊 */
+  .feed .feed-item.kind-video .media-wrap {
+    width: fit-content; max-width: min(560px, 100%);
+    margin: 0 auto; border-radius: 12px; overflow: hidden;
+    background: #0a0c12;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  }
+  .feed .feed-item.kind-video .feed-head { max-width: 560px; margin: 0 auto; }
+  .feed .feed-item.kind-video { background: transparent; border: none; }
+  .feed .feed-item.kind-video .play-overlay .circle { width: 54px; height: 54px; font-size: 20px; }
+  /* 播放器同样按原始尺寸展示，不放大 */
+  .feed .feed-item.kind-video .media-wrap video {
+    width: auto; max-width: 100%; height: auto; max-height: 70vh; display: block;
+  }
+  .media-wrap video { width: 100%; height: auto; max-height: 82vh; display: block; background: #000; }
+  .media-wrap audio { width: min(560px, 88%); margin: 24px auto; display: block; }
+  .media-wrap canvas.audio-art { display: none; }
+  .media-loading {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: #cfd4e4; font-size: 13px; background: rgba(10,12,18,.55);
+  }
+  .play-overlay {
+    position: absolute; inset: 0; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    background: rgba(6,8,14,.32); transition: background .15s;
+  }
+  .play-overlay:hover { background: rgba(6,8,14,.42); }
+  .play-overlay .circle {
+    width: 66px; height: 66px; border-radius: 50%; font-size: 26px;
+    background: rgba(255,255,255,.94); color: #12141c;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  }
+  .play-overlay .hint { font-size: 12px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+  .audio-card {
+    width: 100%; padding: 26px 20px; display: flex; flex-direction: column;
+    align-items: center; gap: 14px; cursor: pointer;
+  }
+  .audio-card .wave { font-size: 34px; }
+  .no-cover {
+    width: 100%; height: 240px; display: flex; align-items: center; justify-content: center;
+    font-size: 58px; opacity: .45;
+    background: linear-gradient(135deg, #1b2133 0%, #262c44 100%);
+  }
+  .card .no-cover-tip {
+    position: absolute; left: 8px; bottom: 8px;
+    font-size: 11px; color: #ffd479; background: rgba(0,0,0,.55);
+    padding: 2px 8px; border-radius: 20px;
+  }
+
+  /* ===== 防截屏 / 防录屏（威慑 + 溯源）===== */
+  img, video, audio, .media-wrap { -webkit-user-drag: none; user-select: none; -webkit-touch-callout: none; }
+  img, video { pointer-events: auto; }
+  body.anti-capture { user-select: none; -webkit-user-select: none; }
+  .watermark {
+    position: fixed; inset: 0; z-index: 120; pointer-events: none;
+    opacity: .045; background-repeat: repeat; background-size: 320px 200px;
+    transition: opacity .2s;
+  }
+  body.privacy-blur .container,
+  body.privacy-blur .modal,
+  body.privacy-blur .watermark { filter: blur(24px) saturate(.5); }
+  .privacy-mask {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    align-items: center; justify-content: center; flex-direction: column; gap: 10px;
+    background: rgba(8,10,16,.78); color: #e8eaf2; text-align: center; padding: 24px;
+  }
+  body.privacy-blur .privacy-mask { display: flex; }
+  .privacy-mask .big { font-size: 40px; }
+  .privacy-mask p { font-size: 14px; color: #b9bfd2; }
+  .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: sp 1s linear infinite; vertical-align: -3px; margin-right: 8px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .card .thumb { height: 110px; }
+  }
+
+  /* ===== 访客模式：只看不改 ===== */
+  body.view-mode .dropzone,
+  body.view-mode .upload-list,
+  body.view-mode .card .del,
+  body.view-mode .card .edit,
+  body.view-mode #btnShareView,
+  body.view-mode #btnShare,
+  body.view-mode .storage,
+  body.view-mode .share-tip { display: none !important; }
+  body.view-mode .toolbar .ro-badge { display: inline-flex; }
+  .ro-badge {
+    display: none; align-items: center; gap: 5px; font-size: 12px;
+    color: var(--ok); background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px;
+  }
+
+  /* 上传行的标题编辑框 */
+  .upload-item .title-input {
+    background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 13px; padding: 6px 10px; width: 200px;
+    outline: none; transition: border-color .15s;
+  }
+  .upload-item .title-input:focus { border-color: var(--accent); }
+  .upload-item .title-input::placeholder { color: var(--text-dim); }
+  .upload-item .name { font-size: 12px; color: var(--text-dim); max-width: 240px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="topbar">
+      <div class="logo">
+        <div class="logo-icon">🎨</div>
+        <div>
+          <h1>陈嘉的个人作品</h1>
+          <p>上传图片 / 音频 / 视频 · 同一房间号的所有人实时共享</p>
+        </div>
+      </div>
+      <div class="room-box">
+        <button class="btn" id="btnShare" title="复制管理链接（对方可上传）">🔗 管理链接</button>
+        <button class="btn ghost" id="btnShareView" title="复制访客链接（对方只能浏览播放）">👁 访客链接</button>
+      </div>
+    </div>
+    <div class="share-tip">
+      <div class="tip-row">
+        <span class="tip-label">🔗 管理链接</span>
+        <span class="link" id="shareLink"></span>
+        <button class="btn ghost" id="btnCopy">复制</button>
+      </div>
+      <div class="tip-row">
+        <span class="tip-label">👁 访客链接</span>
+        <span class="link" id="shareViewLink"></span>
+        <button class="btn ghost" id="btnCopyView">复制</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="dropzone" id="dropzone">
+    <div class="icon">📤</div>
+    <h3>点击选择或拖拽文件到这里</h3>
+    <p>支持图片（jpg / png / gif / webp）、音频（mp3 / wav / m4a）、视频（mp4 / mov / webm），<b>不限文件大小</b>；文件按 1.5MB 分块上传，超大文件请保持页面打开</p>
+    <input type="file" id="fileInput" multiple accept="image/*,audio/*,video/*" hidden>
+  </div>
+
+  <div class="upload-list" id="uploadList"></div>
+
+  <!-- 封面选择输入框：独立放在上传区之外，避免与"上传作品"的文件选择相互干扰 -->
+  <input type="file" id="coverInput" accept="image/*" hidden>
+
+  <div class="toolbar">
+    <h2>我的作品<span class="count" id="countText"></span><span class="storage" id="storageText"></span><span class="ro-badge">👁 只读浏览</span></h2>
+    <button class="btn ghost" id="btnRefresh">⟳ 刷新</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">
+    <div class="icon">🗂️</div>
+    <p>这个房间还没有内容，上传第一个文件吧</p>
+  </div>
+
+  <div class="version">
+    <span id="modeText">管理模式</span> · 版本 v18 · 已开启防截屏保护
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <button class="close" id="modalClose">×</button>
+  <div id="modalBody"></div>
+  <div class="caption" id="modalCaption"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="watermark" id="watermark"></div>
+<div class="privacy-mask" id="privacyMask">
+  <div class="big">🔒</div>
+  <p>页面已失焦，内容暂时隐藏</p>
+  <p style="font-size:12px;color:#7c8399">回到本页面即可继续浏览（用于降低录屏/窥屏采集风险）</p>
+</div>
+
+<script>
+/* 防截屏基础拦截要尽早挂载，避免页面已渲染出内容 */
+(function () {
+  // 1. 禁右键（含"图片另存为"）
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest('img, video, audio, .media-wrap, .card')) {
+      e.preventDefault();
+      if (window.__antiToast) window.__antiToast('内容受保护，已禁用保存');
+    }
+  });
+  // 2. 禁止拖拽媒体文件到外部
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.closest('img, video, audio')) e.preventDefault();
+  });
+  // 3. 拦截常见"保存/打印/另存"快捷键与截屏键
+  document.addEventListener('keydown', function (e) {
+    const k = (e.key || '').toLowerCase();
+    const meta = e.metaKey || e.ctrlKey;
+    if (e.key === 'PrintScreen' || (meta && e.shiftKey && ['3', '4', '5', 's'].includes(k)) ||
+        (meta && ['s', 'p', 'u'].includes(k))) {
+      e.preventDefault();
+      if (window.__antiGuard) window.__antiGuard();
+      if (window.__antiToast) window.__antiToast('检测到截屏/保存操作，内容已临时隐藏');
+    }
+  }, true);
+  // 4. 失焦 / 切到后台 / 窗口被切换时，自动模糊隐藏内容
+  function hide() { if (window.__antiOn) document.body.classList.add('privacy-blur'); }
+  function show() { document.body.classList.remove('privacy-blur'); }
+  window.addEventListener('blur', hide);
+  window.addEventListener('focus', show);
+  document.addEventListener('visibilitychange', function () { document.hidden ? hide() : show(); });
+  // 鼠标移出窗口也隐藏（只在访客只读模式下启用，避免管理时频繁闪动）
+  window.addEventListener('mouseleave', function (e) { if (!e.relatedTarget && window.__antiMouseLeave) hide(); });
+  window.addEventListener('mouseenter', show);
+  window.__antiToastReady = true;
+})();
+</script>
+
+<script>
+'use strict';
+// ============================================================
+// 复用已部署好的公共 MongoDB 云代理（SCF + Atlas），不用改
+// ============================================================
+const MONGO_PROXY_BASE = 'https://1358976348-ev2xewbkbb.ap-guangzhou.tencentscf.com';
+const MONGO_PROXY_API_KEY = 'c83bcb14cd7be632fc14110e41a5a4da';
+const PROJECT_NAME = 'francis-chenjia-works'; // 固定的云端空间（作品集数据都存这里）
+// 管理口令：只有带 #admin=<口令> 打开才进入管理模式；不带参数时默认访客只读（单文件托管时更安全）
+const ADMIN_TOKEN = 'cjcf0186a73daf';
+
+const CHUNK_SIZE = 1.5 * 1024 * 1024; // 每块原始字节数（base64后约2MB，远小于接口限制）
+// 取消单文件大小上限：任何大小都可以上传（超大文件会先提示确认，不限制）
+const BIG_FILE_WARN = 1024 * 1024 * 1024; // ≥1GB 时提示一次
+
+// ---------- 基础云端读写（支持自定义 docKey） ----------
+// lastWriteTs / lastServerTs：用于防止"本地刚改完，被一份更旧的云端数据覆盖回去"
+let lastWriteTs = 0;   // 本机最近一次成功写入主数据的时间
+let lastServerTs = 0;  // 最近一次从云端读回来的主数据版本时间
+
+function mongoUrl(project, key) {
+  return `${MONGO_PROXY_BASE}/state?project=${encodeURIComponent(project)}&key=${encodeURIComponent(key)}`;
+}
+async function cloudGet(project, key) {
+  const resp = await fetch(mongoUrl(project, key), {
+    method: 'GET', headers: { 'x-api-key': MONGO_PROXY_API_KEY },
+  });
+  if (!resp.ok) throw new Error('GET ' + resp.status);
+  const record = await resp.json(); // null 表示不存在
+  if (!record || typeof record.payload !== 'string') {
+    if (key === 'main') lastServerTs = 0;
+    return null;
+  }
+  if (key === 'main' && typeof record.ts === 'number') lastServerTs = record.ts;
+  return JSON.parse(record.payload);
+}
+async function cloudPost(project, key, dataObject, optTs) {
+  const sentTs = typeof optTs === 'number' ? optTs : Date.now();
+  const resp = await fetch(mongoUrl(project, key), {
+    method: 'POST',
+    headers: { 'x-api-key': MONGO_PROXY_API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ts: sentTs, payload: JSON.stringify(dataObject) }),
+  });
+  if (!resp.ok) {
+    let detail = '';
+    try { detail = (await resp.text()).slice(0, 300); } catch (e) {}
+    const err = new Error('POST ' + resp.status + (detail ? ' ' + detail : ''));
+    err.status = resp.status;
+    err.detail = detail;
+    throw err;
+  }
+  return true;
+}
+// 云端存储配额用尽（MongoDB Atlas 免费额度 512MB）——重试没有意义，要提示用户清理
+function isQuotaError(e) {
+  const t = ((e && (e.detail || e.message)) || '').toLowerCase();
+  return t.includes('quota') || t.includes('over your space') || t.includes('space limit');
+}
+// 分块上传：失败自动重试（空间不足类错误不重试）
+async function postWithRetry(project, key, dataObject, attempts, optTs) {
+  const max = attempts || 3;
+  let lastErr;
+  for (let i = 0; i < max; i++) {
+    try { return await cloudPost(project, key, dataObject, optTs); }
+    catch (e) {
+      lastErr = e;
+      if (isQuotaError(e)) throw e;
+      if (i < max - 1) await new Promise(r => setTimeout(r, 600 * Math.pow(2, i)));
+    }
+  }
+  throw lastErr;
+}
+async function cloudDeleteDoc(project, key) {
+  const resp = await fetch(mongoUrl(project, key), {
+    method: 'DELETE', headers: { 'x-api-key': MONGO_PROXY_API_KEY },
+  });
+  if (!resp.ok) throw new Error('DELETE ' + resp.status);
+  return true;
+}
+
+// ---------- 视图模式（无房间号：所有人共用同一个固定空间） ----------
+// 管理页：media-share.html        —— 可上传/编辑/删除
+// 访客页：view.html               —— 只读浏览（内部固定带 v=1）
+// 兼容写法：?v=1 / ?view=1 / ?readonly=1 / #v=1
+const queryParams = new URLSearchParams(location.search);
+function hashParamsLive() { return new URLSearchParams(location.hash.replace(/^#/, '')); }
+function pickParam(name) {
+  return hashParamsLive().get(name) || queryParams.get(name);
+}
+function readViewMode() {
+  // 带对管理口令 -> 管理模式；否则一律只读。
+  // （默认只读更安全：访客即使去掉地址里的参数，也进不了管理界面）
+  const admin = pickParam('admin');
+  if (admin && admin === ADMIN_TOKEN) return false;
+  return true;
+}
+let VIEW_MODE = readViewMode(); // 访客模式：只展示，不显示上传/删除/编辑
+const project = PROJECT_NAME;   // 固定的作品集空间，不再按房间号区分
+
+function applyViewMode() {
+  document.body.classList.toggle('view-mode', VIEW_MODE);
+  document.querySelector('.logo p').textContent = VIEW_MODE
+    ? '只读视图 · 图片视频平铺展示，视频点击即播 · 已开启防截屏保护'
+    : '上传图片 / 音频 / 视频 · 管理你的作品集';
+  document.querySelector('#empty p').textContent = VIEW_MODE ? '还没有作品' : '还没有作品，上传第一个文件吧';
+  document.title = VIEW_MODE ? '陈嘉的个人作品 · 浏览' : '陈嘉的个人作品';
+  const mt = document.getElementById('modeText');
+  if (mt) mt.textContent = VIEW_MODE ? '访客只读模式' : '管理模式';
+}
+applyViewMode();
+function baseUrl() {
+  return location.origin + location.pathname;
+}
+// 访客链接：裸地址（不带口令即只读）
+function guestUrl() {
+  if (location.origin === 'null') return null;
+  return baseUrl();
+}
+// 管理链接：带管理口令
+function manageUrl() {
+  if (location.origin === 'null') return null;
+  return baseUrl() + '#admin=' + ADMIN_TOKEN;
+}
+function refreshShareLink() {
+  const manageEl = document.getElementById('shareLink');
+  const viewEl = document.getElementById('shareViewLink');
+  if (location.origin === 'null') {
+    manageEl.textContent = '本地文件：把 HTML 文件发给对方即可';
+    viewEl.textContent = '需部署到网上后使用';
+    return;
+  }
+  manageEl.textContent = manageUrl();
+  viewEl.textContent = guestUrl();
+}
+refreshShareLink();
+
+function copyShare(view) {
+  if (location.origin === 'null') {
+    return toast('请先把 HTML 文件发给对方');
+  }
+  const url = view ? guestUrl() : manageUrl();
+  navigator.clipboard?.writeText(url).then(
+    () => toast(view ? '已复制访客链接，对方只能浏览和播放' : '已复制管理链接，对方也能上传'),
+    () => toast('复制失败，请手动选择链接复制')
+  );
+}
+document.getElementById('btnShare').addEventListener('click', () => copyShare(false));
+document.getElementById('btnShareView').addEventListener('click', () => copyShare(true));
+document.getElementById('btnCopy').addEventListener('click', () => copyShare(false));
+document.getElementById('btnCopyView').addEventListener('click', () => copyShare(true));
+
+// ---------- 工具 ----------
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ============================================================
+// 防截屏 / 防录屏（网页能力有限，这里是"提高成本 + 可溯源"方案）
+// ------------------------------------------------------------
+// 说明：系统级截图/录屏由操作系统完成，网页无法真正阻止。本套措施包括：
+//   1) 失焦/切后台/鼠标离开窗口时，内容立即模糊隐藏（多数录屏与窥屏场景采不到清晰画面）
+//   2) 全屏平铺水印（作品名 + 当前日期），截图外泄可标记来源
+//   3) 禁用右键保存、拖拽导出、另存/打印快捷键，并对截屏键做响应
+// ============================================================
+
+window.__antiToast = toast;
+window.__antiOn = true;             // 开启失焦/切后台隐藏
+window.__antiMouseLeave = VIEW_MODE; // 访客只读模式下，鼠标离开窗口也隐藏
+window.__antiGuard = () => { // 检测到截屏/保存动作时，临时遮挡画面
+  document.body.classList.add('privacy-blur');
+  clearTimeout(window.__antiGuardTimer);
+  window.__antiGuardTimer = setTimeout(() => document.body.classList.remove('privacy-blur'), 1800);
+};
+
+function paintWatermark() {
+  const el = document.getElementById('watermark');
+  if (!el) return;
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  const dateStr = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  const txt = `陈嘉的个人作品 · ${dateStr}`;
+  const safe = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200">` +
+    `<text x="6" y="104" fill="#ffffff" font-size="15" font-family="monospace" transform="rotate(-22 160 100)">${safe}</text></svg>`;
+  el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+}
+paintWatermark();
+setInterval(paintWatermark, 60000); // 日期变化时自动刷新
+document.body.classList.add('anti-capture');
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+  return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+}
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getMonth() + 1}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function typeKind(mime) {
+  if (mime.startsWith('image/')) return 'image';
+  if (mime.startsWith('audio/')) return 'audio';
+  if (mime.startsWith('video/')) return 'video';
+  return null;
+}
+function kindIcon(kind) { return kind === 'image' ? '🖼️' : kind === 'audio' ? '🎵' : '🎬'; }
+
+// ArrayBuffer -> base64（分小段避免栈溢出）
+function bufToBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  const CH = 0x8000;
+  let s = '';
+  for (let i = 0; i < bytes.length; i += CH) {
+    s += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+  }
+  return btoa(s);
+}
+// base64 -> Uint8Array
+function base64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+// 读取 File/Blob 片段的 base64
+function readSliceBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1] || '');
+    r.onerror = () => reject(new Error('读取文件失败'));
+    r.readAsDataURL(blob);
+  });
+}
+
+// 生成缩略图/封面：图片直接缩放；视频在多个时间点截帧，挑画面信息量最大的一帧
+const THUMB_MAX = 640;  // 图片列表缩略图最长边
+const COVER_MAX = 1280; // 视频/音频封面最长边（访客页要展示，分辨率更高才不糊）
+
+// 把图片/视频帧按比例缩放到 canvas 并导出 JPEG
+function drawToDataURL(source, sw, sh, maxEdge, quality) {
+  const scale = Math.min(1, maxEdge / Math.max(sw || maxEdge, sh || maxEdge));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round((sw || maxEdge) * scale));
+  c.height = Math.max(1, Math.round((sh || maxEdge) * scale));
+  const ctx = c.getContext('2d');
+  ctx.drawImage(source, 0, 0, c.width, c.height);
+  return { dataURL: c.toDataURL('image/jpeg', quality || 0.72), context: ctx, canvas: c };
+}
+
+// 画面评分：越"有内容"（亮度适中、明暗变化大）分数越高，用来避开纯黑/纯白开头
+function frameScore(ctx, w, h) {
+  try {
+    const step = Math.max(1, Math.floor(Math.min(w, h) / 40));
+    const d = ctx.getImageData(0, 0, w, h).data;
+    let sum = 0, sum2 = 0, n = 0;
+    for (let y = 0; y < h; y += step) {
+      for (let x = 0; x < w; x += step) {
+        const i = (y * w + x) * 4;
+        const lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        sum += lum; sum2 += lum * lum; n++;
+      }
+    }
+    if (!n) return -1;
+    const mean = sum / n;
+    const variance = sum2 / n - mean * mean;
+    return variance + mean * 0.3; // 画面层次越丰富、亮度适中越好
+  } catch (e) { return 0; } // getImageData 失败（理论上同源不会）时按 0 处理
+}
+
+function seekVideo(v, t) {
+  return new Promise((res, rej) => {
+    const to = setTimeout(() => rej(new Error('seek timeout')), 6000);
+    const done = () => { clearTimeout(to); v.onseeked = null; res(); };
+    v.onseeked = done;
+    try { v.currentTime = t; } catch (e) { clearTimeout(to); rej(e); }
+  });
+}
+
+async function captureVideoCover(file) {
+  const url = URL.createObjectURL(file);
+  const v = document.createElement('video');
+  v.muted = true; v.playsInline = true; v.preload = 'auto'; v.crossOrigin = 'anonymous';
+  v.src = url;
+  try {
+    await new Promise((res, rej) => {
+      const to = setTimeout(() => rej(new Error('metadata timeout')), 12000);
+      v.onloadedmetadata = () => { clearTimeout(to); res(); };
+      v.onerror = () => { clearTimeout(to); rej(new Error('decode error')); };
+    });
+    const dur = (isFinite(v.duration) && v.duration > 0) ? v.duration : 0;
+    // 多个候选时间点：避开开头黑场与片尾字幕
+    const candidates = dur
+      ? [dur * 0.1, dur * 0.25, dur * 0.4, dur * 0.6, Math.max(0.1, dur - 0.5)]
+      : [0.1, 0.5, 1, 2];
+    // 先短暂播放一下：部分浏览器/编码要先出画面才能截图
+    try {
+      await v.play();
+      await new Promise(r => setTimeout(r, 300));
+      v.pause();
+    } catch (e) { /* 不允许自动播放也不影响后续 seek 截帧 */ }
+
+    let best = null, bestScore = -1;
+    for (const t of candidates) {
+      if (!isFinite(t) || t < 0) continue;
+      try {
+        await seekVideo(v, Math.min(t, dur ? Math.max(0, dur - 0.05) : t));
+        if (!v.videoWidth) continue;
+        const shot = drawToDataURL(v, v.videoWidth, v.videoHeight, COVER_MAX, 0.82);
+        const score = frameScore(shot.context, shot.canvas.width, shot.canvas.height);
+        if (score > bestScore) { bestScore = score; best = shot.dataURL; }
+      } catch (e) { /* 该时间点失败就试下一个 */ }
+    }
+    // 兜底：所有时间点都失败时，直接截当前帧
+    if (!best && v.videoWidth) {
+      try { best = drawToDataURL(v, v.videoWidth, v.videoHeight, COVER_MAX, 0.82).dataURL; } catch (e) {}
+    }
+    return best;
+  } catch (e) {
+    return null; // 浏览器解不了的编码（如 H.265/ProRes 的 .mov），需要手动上传封面
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function makeThumb(file, kind) {
+  try {
+    if (kind === 'image') {
+      const url = URL.createObjectURL(file);
+      try {
+        const img = await new Promise((res, rej) => {
+          const i = new Image();
+          i.onload = () => res(i);
+          i.onerror = rej;
+          i.src = url;
+        });
+        return drawToDataURL(img, img.width, img.height, THUMB_MAX, 0.72).dataURL;
+      } finally { URL.revokeObjectURL(url); }
+    }
+    if (kind === 'video') return await captureVideoCover(file);
+  } catch (e) { /* 缩略图失败不阻塞上传 */ }
+  return null;
+}
+
+// ---------- 上传 ----------
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const uploadList = document.getElementById('uploadList');
+
+// 只在"直接点上传区本身"时打开作品选择框；卡片上的按钮（设封面等）点击不冒泡到这里
+dropzone.addEventListener('click', e => {
+  if (e.target.closest('button, .card') || e.target === fileInput) return;
+  fileInput.click();
+});
+fileInput.addEventListener('change', () => {
+  // 注意：FileList 是实时引用，必须先复制成数组再清空 input，否则文件会被一起清掉
+  const files = Array.from(fileInput.files || []);
+  fileInput.value = '';
+  if (files.length) handleFiles(files);
+});
+['dragenter', 'dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+dropzone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+
+let uploading = false;
+
+async function handleFiles(fileList) {
+  if (VIEW_MODE) return toast('当前是只读视图，无法上传');
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  if (uploading) return toast('有文件正在上传中，请稍候');
+
+  // 元数据合并：先拉云端最新列表，避免覆盖别人刚传的
+  uploading = true;
+  let meta = await cloudGet(project, 'main');
+  let items = Array.isArray(meta?.items) ? meta.items : [];
+
+  // 上传前预检云端空间，避免传到一半才因为配额失败
+  const usedMB = estimateUsageMB(items);
+  const incomingMB = files.filter(f => typeKind(f.type || '')).reduce((n, f) => n + f.size, 0) / 1048576 * B64_OVERHEAD;
+  if (usedMB + incomingMB > STORAGE_QUOTA_MB) {
+    uploading = false;
+    toast(`空间不足：已用约 ${usedMB.toFixed(0)}MB，本次需要约 ${incomingMB.toFixed(0)}MB，上限 ${STORAGE_QUOTA_MB}MB，请先删除部分作品`);
+    return;
+  }
+
+  for (const file of files) {
+    const kind = typeKind(file.type || '');
+    if (!kind) { addUploadRow(file.name, 'skip', '不支持的类型'); continue; }
+
+    // 不限制文件大小，仅对超大文件做一次确认，避免误传超长视频
+    if (file.size >= BIG_FILE_WARN) {
+      const ok = confirm(`「${file.name}」大小约 ${fmtSize(file.size)}，属于超大文件。\n\n上传和在线播放都会比较耗时，且需要保持页面不要关闭。确定继续吗？`);
+      if (!ok) { addUploadRow(file.name, 'skip', '已跳过'); continue; }
+    }
+
+    const row = addUploadRow(file.name, 'progress', '0%', 0);
+    const titleInput = row.querySelector('.title-input');
+    const fileId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    row.dataset.itemId = fileId; // 用于卡片与上传行之间的标题同步
+    let savedItem = null; // 该文件写入云端后的记录，便于标题改完即时同步
+    const uploadedKeys = []; // 本次已成功写入的分块，失败时用于回滚
+    try {
+      const id = fileId;
+      const total = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
+
+      for (let i = 0; i < total; i++) {
+        const slice = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        const b64 = await readSliceBase64(slice);
+        const key = `c-${id}-${i}`;
+        updateUploadRow(row, 'progress', `上传中 ${i + 1}/${total}（自动重试已开启）`, Math.round((i / total) * 90));
+        await postWithRetry(project, key, { id, i, total, data: b64 });
+        uploadedKeys.push(key);
+        const pct = Math.round(((i + 1) / total) * 90);
+        updateUploadRow(row, 'progress', `${pct}%  (${i + 1}/${total} 块)`, pct * 0.9);
+      }
+
+      updateUploadRow(row, 'progress', '生成缩略图…', 93);
+      const thumb = await makeThumb(file, kind);
+
+      savedItem = {
+        id, name: file.name, title: (titleInput.value || '').trim() || file.name,
+        type: file.type || kind, size: file.size,
+        ts: Date.now(), kind, chunks: total, thumb,
+      };
+      items.push(savedItem);
+
+      updateUploadRow(row, 'progress', '写入云端…', 96);
+      await saveMeta(items);
+
+      // 上传中/上传后还能改标题：边打字边保存（防抖）
+      // rowEdited 保证只有用户真的改过这一行，才会用行里的值去覆盖云端标题
+      let titleTimer = null;
+      let rowEdited = false;
+      const syncTitle = async () => {
+        clearTimeout(titleTimer);
+        titleTimer = null; // 标记防抖已结束，行可以安全移除
+        if (!rowEdited) return;
+        const t = titleInput.value.trim() || file.name;
+        if (savedItem.title === t) return;
+        savedItem.title = t;
+        renderList(items);
+        try { await saveMeta(items, 2); toast('标题已更新'); }
+        catch (e) { console.error(e); toast(isQuotaError(e) ? '云端空间已满，标题未保存' : '标题同步失败，请重试'); }
+      };
+      titleInput.addEventListener('input', () => {
+        rowEdited = true;
+        clearTimeout(titleTimer);
+        titleTimer = setTimeout(syncTitle, 800);
+      });
+      titleInput.addEventListener('change', syncTitle);
+      titleInput.addEventListener('blur', syncTitle);
+
+      // 手动收起：先确保标题已保存再移除
+      const closeBtn = row.querySelector('.row-close');
+      if (closeBtn) closeBtn.addEventListener('click', async () => { await syncTitle(); row.remove(); });
+
+      updateUploadRow(row, 'ok', '完成（可继续修改标题）', 100);
+      // 行保留较长时间，方便慢慢写标题；正在输入或有未落库的修改时不移除
+      const removeRowWhenDone = () => {
+        if (document.activeElement === titleInput || titleTimer) { setTimeout(removeRowWhenDone, 1500); return; }
+        row.remove();
+      };
+      setTimeout(removeRowWhenDone, 20000);
+      renderList(items);
+      if (kind !== 'image' && !thumb) {
+        toast('未能自动截取封面，可在该卡片上点 🖼 手动设置封面图');
+      }
+    } catch (e) {
+      console.error(e);
+      // 关键：失败时把已写入的分块删掉，避免残留数据占满云端空间
+      let rolledBack = 0;
+      for (const key of uploadedKeys) {
+        try { await cloudDeleteDoc(project, key); rolledBack++; } catch (er) { /* 忽略 */ }
+      }
+      if (rolledBack) console.log('已回滚分块:', rolledBack);
+      const msg = isQuotaError(e)
+        ? `上传失败：云端存储空间已满（约 512MB 上限）${rolledBack ? '，已回滚临时数据' : ''}`
+        : `上传失败：${e.message}${rolledBack ? `（已回滚 ${rolledBack} 个分块）` : ''}`;
+      updateUploadRow(row, 'err', msg, 0);
+      toast(isQuotaError(e) ? '云端空间已满，请先删除部分作品再上传' : '上传失败，已自动清理临时数据');
+    }
+  }
+  uploading = false;
+  toast('上传完成');
+}
+
+function addUploadRow(name, status, text, pct) {
+  const row = document.createElement('div');
+  row.className = 'upload-item';
+  const editable = status === 'progress';
+  row.innerHTML = `
+    ${editable
+      ? `<input class="title-input" placeholder="给这个文件写个标题…" value="${escapeHtml(name)}" title="可编辑标题，边打边自动保存">
+         <span class="name" title="${escapeHtml(name)}">${escapeHtml(name)}</span>`
+      : `<span class="name">${escapeHtml(name)}</span>`}
+    <div class="bar"><div></div></div>
+    <span class="status">${text}</span>
+    <button class="row-close" title="收起这一行">✕</button>`;
+  uploadList.prepend(row);
+  if (pct != null) row.querySelector('.bar > div').style.width = pct + '%';
+  return row;
+}
+function updateUploadRow(row, status, text, pct) {
+  const st = row.querySelector('.status');
+  st.textContent = text;
+  st.className = 'status ' + (status === 'progress' ? '' : status);
+  if (pct != null) row.querySelector('.bar > div').style.width = pct + '%';
+}
+// 统一保存整份媒体列表：
+// 1) 串行队列，避免多次改动并发写入时相互覆盖（后写的未必是新的）
+// 2) 写入成功记录时间戳，用于识别并丢弃过期的云端数据
+let metaQueue = Promise.resolve();
+async function saveMeta(items, attempts) {
+  const snapshot = { items: JSON.parse(JSON.stringify(items || [])) };
+  const writeTs = Date.now(); // 与请求里发送的时间戳保持完全一致
+  const run = async () => {
+    // 排队等待期间可能又有新的修改，这里用排队时的快照写入
+    await postWithRetry(project, 'main', snapshot, attempts || 3, writeTs);
+    lastWriteTs = Math.max(lastWriteTs, writeTs);
+  };
+  const p = metaQueue.then(run, run); // 上一次失败也要继续排队
+  metaQueue = p.catch(() => {});
+  return p;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ---------- 媒体库列表 ----------
+const grid = document.getElementById('grid');
+const emptyBox = document.getElementById('empty');
+const blobCache = new Map(); // id -> objectURL
+let currentItems = [];       // 当前列表（供编辑标题/删除时复用）
+let listLoading = false;
+
+async function loadLibrary(silent) {
+  if (listLoading) return;
+  listLoading = true;
+  const hadContent = currentItems.length > 0;
+  if (!silent || !hadContent) {
+    grid.innerHTML = '<div class="loading" style="grid-column:1/-1"><span class="spin"></span>正在从云端加载…</div>';
+    emptyBox.style.display = 'none';
+  }
+  try {
+    // 本地刚写过（60 秒内）时，若这次取回的云端版本比本地写入更旧，
+    // 说明是并发/缓存导致的过期数据，忽略它，避免标题等改动被回退
+    const writeTsBefore = lastWriteTs;
+    const meta = await cloudGet(project, 'main');
+    const localWriteRecent = writeTsBefore && (Date.now() - writeTsBefore < 60000);
+    if (localWriteRecent && lastServerTs && lastServerTs < writeTsBefore) {
+      console.warn('云端数据比本地修改更旧，已忽略本次刷新，避免标题等改动被回退');
+      listLoading = false;
+      return;
+    }
+    const items = Array.isArray(meta?.items) ? meta.items : [];
+    renderList(items);
+  } catch (e) {
+    console.error(e);
+    if (!silent || !hadContent) grid.innerHTML = '<div class="loading" style="grid-column:1/-1">加载失败，请点击「刷新」重试</div>';
+  }
+  listLoading = false;
+}
+
+// ============================================================
+// 云端空间用量：媒体以 base64 存进数据库，体积约为原始文件的 1.36 倍
+// 免费集群上限 512MB，接近时提前提醒，避免上传到一半才失败
+// ============================================================
+const STORAGE_QUOTA_MB = 512;
+const B64_OVERHEAD = 1.36;
+
+function estimateUsageMB(items) {
+  const bytes = (items || []).reduce((n, i) =>
+    n + (i.size || 0) * B64_OVERHEAD + (i.thumb ? i.thumb.length : 0), 0);
+  return bytes / 1048576;
+}
+function renderStorage(items) {
+  const el = document.getElementById('storageText');
+  if (!el) return;
+  // 空间用量属于管理信息，访客只读视图不展示
+  if (VIEW_MODE) { el.textContent = ''; el.className = 'storage'; return; }
+  const mb = estimateUsageMB(items);
+  const pct = Math.round((mb / STORAGE_QUOTA_MB) * 100);
+  el.textContent = `云端已用约 ${mb.toFixed(0)} MB / ${STORAGE_QUOTA_MB} MB（${pct}%）`;
+  el.className = 'storage' + (pct >= 98 ? ' full' : pct >= 85 ? ' warn' : '');
+}
+
+function renderList(items, clearOnly) {
+  currentItems = items;
+  document.getElementById('countText').textContent = items.length ? `（${items.length} 个文件）` : '';
+  renderStorage(items);
+  grid.innerHTML = '';
+  emptyBox.style.display = items.length ? 'none' : 'block';
+  if (clearOnly) return;
+  grid.classList.toggle('feed', !!VIEW_MODE);
+  if (VIEW_MODE) { renderFeed(items); return; }
+
+  items.sort((a, b) => b.ts - a.ts).forEach(item => {
+    const kind = item.kind || typeKind(item.type) || 'image';
+    const title = (item.title || '').trim() || item.name;
+    const showName = title !== item.name;
+    const card = document.createElement('div');
+    card.className = 'card' + (kind !== 'image' && !item.thumb ? ' need-cover' : '');
+    card.innerHTML = `
+      <div class="thumb">
+        ${item.thumb
+          ? `<img src="${item.thumb}" alt="">`
+          : `<span class="type-icon">${kindIcon(kind)}</span>`}
+        <span class="badge">${kind === 'image' ? '图片' : kind === 'audio' ? '音频' : '视频'}</span>
+        ${kind !== 'image' && !item.thumb ? '<span class="no-cover-tip">点 🖼 传封面 / 📸 从视频截取</span>' : ''}
+      </div>
+      ${VIEW_MODE ? '' : `${kind === 'image' ? '' : '<button class="cover" title="上传一张图片作为封面">🖼</button>'}${
+        kind === 'video' ? '<button class="reframe" title="从视频中重新截取一帧作为封面">📸</button>' : ''
+      }<button class="edit" title="修改标题">✏️</button><button class="del" title="删除">🗑</button>`}
+      <div class="meta">
+        <div class="fname" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+        ${showName ? `<div class="fpath" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>` : ''}
+        <div class="finfo"><span>${fmtSize(item.size)}</span><span>${fmtTime(item.ts)}</span></div>
+      </div>`;
+    card.addEventListener('click', () => openViewer(item));
+    const delBtn = card.querySelector('.del');
+    if (delBtn) delBtn.addEventListener('click', e => { e.stopPropagation(); deleteItem(item); });
+    const editBtn = card.querySelector('.edit');
+    if (editBtn) editBtn.addEventListener('click', e => { e.stopPropagation(); editTitle(item); });
+    const coverBtn = card.querySelector('.cover');
+    if (coverBtn) coverBtn.addEventListener('click', e => { e.stopPropagation(); pickCover(item); });
+    const reframeBtn = card.querySelector('.reframe');
+    if (reframeBtn) reframeBtn.addEventListener('click', e => { e.stopPropagation(); reframeCover(item); });
+    grid.appendChild(card);
+  });
+}
+
+// ---------- 设置封面预览图（视频/音频） ----------
+const coverInput = document.getElementById('coverInput');
+let coverTarget = null;
+let reframeBusy = false;
+
+function pickCover(item) {
+  coverTarget = item;
+  coverInput.value = '';
+  // 阻止冒泡，避免触发上传区的文件选择（否则封面图会被当成新作品上传）
+  coverInput.onclick = e => e.stopPropagation();
+  coverInput.click();
+}
+
+// 对已上传的视频重新抓取封面（无需重新上传文件）
+async function reframeCover(item) {
+  if (reframeBusy) return toast('正在处理中，请稍候');
+  reframeBusy = true;
+  try {
+    toast('正在下载视频数据，请稍候…');
+    const url = await getItemBlobURL(item, (done, total) => {
+      if (done === total || done % 5 === 0) toast(`正在下载视频数据 ${done}/${total}…`);
+    });
+    const blob = await fetch(url).then(r => r.blob());
+    toast('正在解析视频并截取封面…');
+    const thumb = await captureVideoCover(blob);
+    if (!thumb) {
+      toast('该视频编码浏览器无法解码，请点 🖼 上传封面图');
+      return;
+    }
+    item.thumb = thumb;
+    renderList(currentItems);
+    await saveMeta(currentItems);
+    toast('封面已从视频中截取并保存');
+  } catch (e) {
+    console.error(e);
+    toast('截取失败：' + e.message);
+  } finally {
+    reframeBusy = false;
+  }
+}
+
+coverInput.addEventListener('change', async () => {
+  const file = coverInput.files && coverInput.files[0];
+  const item = coverTarget;
+  if (!file || !item) return;
+  try {
+    if (!(file.type || '').startsWith('image/')) return toast('请选择一张图片作为封面');
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = url;
+    });
+    const dataURL = drawToDataURL(img, img.width, img.height, COVER_MAX, 0.82).dataURL;
+    URL.revokeObjectURL(url);
+    item.thumb = dataURL;
+    renderList(currentItems);
+    await saveMeta(currentItems);
+    toast('封面已更新');
+  } catch (e) {
+    console.error(e);
+    toast('封面设置失败，请换一张图片试试');
+  } finally {
+    coverTarget = null;
+  }
+});
+
+// ---------- 访客平铺流：图片整宽原比例展示，视频就地播放 ----------
+const feedObserver = ('IntersectionObserver' in window)
+  ? new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const wrap = en.target;
+        feedObserver.unobserve(wrap);
+        const item = currentItems.find(x => x.id === wrap.dataset.feedId);
+        if (item) loadFeedImage(item, wrap);
+      });
+    }, { rootMargin: '400px 0px' })
+  : null;
+
+function mediaLoading(wrap, text) {
+  const hint = document.createElement('div');
+  hint.className = 'media-loading';
+  hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>${text}`;
+  wrap.appendChild(hint);
+  return hint;
+}
+
+async function loadFeedImage(item, wrap) {
+  const hint = mediaLoading(wrap, '正在加载原图…');
+  const onProgress = (done, total) => {
+    if (total > 1) hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>正在加载原图 ${done}/${total}`;
+  };
+  try {
+    const url = await getItemBlobURL(item, onProgress);
+    const img = new Image();
+    img.className = 'full';
+    img.alt = (item.title || item.name);
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const ph = wrap.querySelector('img.placeholder');
+    if (ph) ph.replaceWith(img); else wrap.appendChild(img);
+    wrap.classList.add('has-media');
+  } catch (e) {
+    console.error(e);
+    hint.textContent = '加载失败，请刷新重试';
+    return;
+  }
+  hint.remove();
+}
+
+async function playInFeed(item, wrap) {
+  const kind = item.kind || typeKind(item.type) || 'image';
+  const overlay = wrap.querySelector('.play-overlay') || wrap.querySelector('.audio-card');
+  if (overlay) overlay.remove();
+  // 播放器插入前先移除封面预览图，否则封面会盖在播放器上面
+  const cover = wrap.querySelector('.video-cover, .no-cover');
+  if (cover) cover.remove();
+  const label = kind === 'video' ? '视频' : '音频';
+  const hint = mediaLoading(wrap, `正在加载${label}…`);
+  const onProgress = (done, total) => {
+    if (total > 1) hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>正在加载${label} ${done}/${total}`;
+  };
+  try {
+    const url = await getItemBlobURL(item, onProgress);
+    hint.remove();
+    wrap.classList.add('has-media');
+    if (kind === 'video') {
+      const v = document.createElement('video');
+      v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = 'auto';
+      v.src = url;
+      wrap.appendChild(v);
+      v.play().catch(() => {});
+    } else {
+      const a = document.createElement('audio');
+      a.controls = true; a.autoplay = true; a.src = url;
+      wrap.appendChild(a);
+      a.play().catch(() => {});
+    }
+  } catch (e) {
+    console.error(e);
+    hint.textContent = '加载失败，请刷新重试';
+  }
+}
+
+function renderFeed(items) {
+  items.sort((a, b) => b.ts - a.ts).forEach(item => {
+    const kind = item.kind || typeKind(item.type) || 'image';
+    const title = (item.title || '').trim() || item.name;
+    const el = document.createElement('div');
+    el.className = 'feed-item kind-' + kind; // 便于按类型分别控制展示尺寸
+    el.dataset.id = item.id;
+    const head = `
+      <div class="feed-head">
+        <span class="feed-title" title="${escapeHtml(title)}">${escapeHtml(title)}</span>
+        <span class="feed-sub">${fmtSize(item.size)} · ${fmtTime(item.ts)}</span>
+      </div>`;
+
+    let body;
+    if (kind === 'image') {
+      body = `<div class="media-wrap" data-feed-id="${item.id}">${item.thumb ? `<img class="placeholder" src="${item.thumb}" alt="">` : ''}</div>`;
+    } else if (kind === 'video') {
+      body = `
+        <div class="media-wrap has-media" data-feed-id="${item.id}">
+          ${item.thumb ? `<img class="video-cover" src="${item.thumb}" alt="${escapeHtml(title)}">` : `<div class="no-cover">🎬</div>`}
+          <div class="play-overlay"><div class="circle">▶</div>${item.thumb ? '' : '<div class="hint">点击播放视频</div>'}</div>
+        </div>`;
+    } else {
+      body = `
+        <div class="media-wrap" data-feed-id="${item.id}">
+          <div class="audio-card"><div class="wave">🎵</div><div class="hint" style="color:#8b91a7">点击播放音频</div></div>
+        </div>`;
+    }
+    el.innerHTML = head + body;
+
+    const wrap = el.querySelector('.media-wrap');
+    if (kind === 'image') {
+      if (feedObserver) feedObserver.observe(wrap); else loadFeedImage(item, wrap);
+    } else {
+      wrap.addEventListener('click', e => {
+        if (e.target.closest('video, audio')) return; // 已加载完就不再重复触发
+        playInFeed(item, wrap);
+      });
+    }
+    grid.appendChild(el);
+  });
+}
+
+// ---------- 修改标题 ----------
+async function editTitle(item) {
+  const cur = (item.title || '').trim() || item.name;
+  const next = prompt('修改标题（给图片/视频加个小标题）：', cur);
+  if (next === null) return;
+  const title = next.trim();
+  item.title = title || item.name;
+  // 若该作品的上传行还在，同步过去，避免行里的旧标题把它覆盖回去
+  const rowInput = document.querySelector(`.upload-item[data-item-id="${item.id}"] .title-input`);
+  if (rowInput) rowInput.value = item.title;
+  renderList(currentItems);
+  try {
+    await saveMeta(currentItems);
+    toast('标题已更新');
+  } catch (e) {
+    console.error(e);
+    toast('标题同步失败，请重试');
+  }
+}
+
+document.getElementById('btnRefresh').addEventListener('click', loadLibrary);
+
+// ---------- 查看 ----------
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modalBody');
+const modalCaption = document.getElementById('modalCaption');
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function closeModal() {
+  modal.classList.remove('show');
+  modalBody.innerHTML = '';
+}
+
+async function getItemBlobURL(item, onProgress) {
+  const cached = blobCache.get(item.id);
+  if (cached) { blobCache.delete(item.id); blobCache.set(item.id, cached); return cached.url; } // 命中即刷新为最近使用
+  const parts = [];
+  for (let i = 0; i < item.chunks; i++) {
+    const chunk = await cloudGet(project, `c-${item.id}-${i}`);
+    if (!chunk || typeof chunk.data !== 'string') throw new Error('云端数据缺失（块 ' + (i + 1) + '/' + item.chunks + '）');
+    // 逐块解码成字节数组，避免超大文件先把整份 base64 拼成一个大字符串（内存翻倍）
+    parts.push(base64ToBytes(chunk.data));
+    if (onProgress) onProgress(i + 1, item.chunks);
+  }
+  const url = URL.createObjectURL(new Blob(parts, { type: item.type }));
+  cacheBlob(item.id, url, item.size || 0);
+  return url;
+}
+
+// 播放缓存按体积淘汰：不设上限后，超大文件容易把浏览器内存撑爆
+const CACHE_LIMIT = 500 * 1024 * 1024; // 最多缓存 500MB
+let cachedBytes = 0;
+function clearBlobCache() {
+  blobCache.forEach(v => URL.revokeObjectURL(v.url));
+  blobCache.clear();
+  cachedBytes = 0;
+}
+function cacheBlob(id, url, size) {
+  blobCache.set(id, { url, size });
+  cachedBytes += size;
+  while (cachedBytes > CACHE_LIMIT && blobCache.size > 1) {
+    const oldestId = blobCache.keys().next().value; // 淘汰最久未使用的
+    const old = blobCache.get(oldestId);
+    URL.revokeObjectURL(old.url);
+    cachedBytes -= old.size;
+    blobCache.delete(oldestId);
+  }
+}
+
+async function openViewer(item) {
+  const kind = item.kind || typeKind(item.type) || 'image';
+  const title = (item.title || '').trim() || item.name;
+  const head = title === item.name ? title : `${title} · ${item.name}`;
+  modalCaption.textContent = head + ' · ' + fmtSize(item.size) + ' · 正在加载…';
+  modalBody.innerHTML = '<div class="loading" style="color:#8b91a7"><span class="spin" style="border-top-color:#6c8cff"></span>正在从云端拉取文件…</div>';
+  modal.classList.add('show');
+  try {
+    const url = await getItemBlobURL(item, (done, total) => {
+      if (total > 1) modalBody.innerHTML = `<div class="loading" style="color:#8b91a7"><span class="spin" style="border-top-color:#6c8cff"></span>正在拉取文件 ${done}/${total}</div>`;
+    });
+    if (kind === 'image') {
+      modalBody.innerHTML = `<img src="${url}" alt="">`;
+    } else if (kind === 'video') {
+      modalBody.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
+    } else {
+      modalBody.innerHTML = `<div style="font-size:60px;margin-bottom:6px">🎵</div><audio src="${url}" controls autoplay></audio>`;
+    }
+    modalCaption.textContent = head + ' · ' + fmtSize(item.size) + ' · ' + fmtTime(item.ts);
+  } catch (e) {
+    console.error(e);
+    modalBody.innerHTML = '<div class="loading" style="color:#ff5c7a">加载失败：' + escapeHtml(e.message) + '</div>';
+    modalCaption.textContent = head;
+  }
+}
+
+// ---------- 删除 ----------
+async function deleteItem(item) {
+  const title = (item.title || '').trim() || item.name;
+  if (!confirm('确定删除「' + title + '」？所有房间成员都会看到它被删除。')) return;
+  try {
+    for (let i = 0; i < item.chunks; i++) {
+      await cloudDeleteDoc(project, `c-${item.id}-${i}`).catch(() => {});
+    }
+    const meta = await cloudGet(project, 'main');
+    const items = (Array.isArray(meta?.items) ? meta.items : []).filter(x => x.id !== item.id);
+    await saveMeta(items);
+    const cachedBlob = blobCache.get(item.id);
+    if (cachedBlob) {
+      URL.revokeObjectURL(cachedBlob.url);
+      cachedBytes -= cachedBlob.size;
+      blobCache.delete(item.id);
+    }
+    renderList(items);
+    toast('已删除');
+  } catch (e) {
+    console.error(e);
+    toast('删除失败，请重试');
+  }
+}
+
+// ---------- 启动 ----------
+loadLibrary();
+// 切回页面时自动刷新，便于看到其他人新上传的内容（静默刷新，不闪加载态）
+document.addEventListener('visibilitychange', () => { if (!document.hidden) loadLibrary(true); });
+
+// 在同一个标签页里切换「管理链接 / 访客链接」时，浏览器只改 # 不会重新加载页面，
+// 这里监听 hash 变化，实时切换管理模式与只读模式
+window.addEventListener('hashchange', () => {
+  const nextView = readViewMode();
+  if (nextView === VIEW_MODE) return;
+  VIEW_MODE = nextView;
+  applyViewMode();
+  refreshShareLink();
+  clearBlobCache();
+  closeModal();
+  renderList([], true);
+  loadLibrary();
+});
+</script>
+</body>
+</html>
