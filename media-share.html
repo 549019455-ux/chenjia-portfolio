@@ -375,7 +375,7 @@
   </div>
 
   <div class="version">
-    <span id="modeText">管理模式</span> · 版本 v19 · 已开启防截屏保护
+    <span id="modeText">管理模式</span> · 版本 v20 · 已开启防截屏保护
   </div>
 </div>
 
@@ -1148,6 +1148,13 @@ const feedObserver = ('IntersectionObserver' in window)
     }, { rootMargin: '400px 0px' })
   : null;
 
+// 分块下载进度 -> 百分比文案（如 45%）
+function loadPercent(done, total) {
+  if (!total || total < 1) return '0%';
+  const pct = Math.min(100, Math.max(0, Math.round((done / total) * 100)));
+  return pct + '%';
+}
+
 function mediaLoading(wrap, text) {
   const hint = document.createElement('div');
   hint.className = 'media-loading';
@@ -1159,7 +1166,7 @@ function mediaLoading(wrap, text) {
 async function loadFeedImage(item, wrap) {
   const hint = mediaLoading(wrap, '正在加载原图…');
   const onProgress = (done, total) => {
-    if (total > 1) hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>正在加载原图 ${done}/${total}`;
+    hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>正在加载原图 ${loadPercent(done, total)}`;
   };
   try {
     const url = await getItemBlobURL(item, onProgress);
@@ -1195,7 +1202,7 @@ async function playInFeed(item, wrap) {
   // 加载期间保留封面，只叠加进度提示，避免窗口出现空白/塌陷
   const hint = mediaLoading(wrap, `正在加载${label}…`);
   const onProgress = (done, total) => {
-    if (total > 1) hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>正在加载${label} ${done}/${total}`;
+    hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>正在加载${label} ${loadPercent(done, total)}`;
   };
   try {
     const url = await getItemBlobURL(item, onProgress);
@@ -1354,7 +1361,7 @@ async function openViewer(item) {
   modal.classList.add('show');
   try {
     const url = await getItemBlobURL(item, (done, total) => {
-      if (total > 1) modalBody.innerHTML = `<div class="loading" style="color:#8b91a7"><span class="spin" style="border-top-color:#6c8cff"></span>正在拉取文件 ${done}/${total}</div>`;
+      modalBody.innerHTML = `<div class="loading" style="color:#8b91a7"><span class="spin" style="border-top-color:#6c8cff"></span>正在拉取文件 ${loadPercent(done, total)}</div>`;
     });
     if (kind === 'image') {
       modalBody.innerHTML = `<img src="${url}" alt="">`;
