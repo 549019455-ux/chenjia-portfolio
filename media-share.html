@@ -211,9 +211,12 @@
   .media-wrap img.placeholder { filter: blur(14px); transform: scale(1.03); }
   /* 视频预览图：访客界面要清晰展示（不能用模糊占位样式） */
   .media-wrap img.video-cover { width: auto; max-width: 100%; height: auto; display: block; }
-  /* 访客界面的视频窗口：收窄居中，且窗口按封面实际尺寸收缩，绝不放大小图导致模糊 */
+  /* 访客界面的视频窗口：收窄居中；
+     窗口尺寸由"画面比例"（aspect-ratio）决定，而不是靠里面的图片/播放器撑开——
+     这样即使暂时没有内容（加载中）也不会塌陷消失。 */
   .feed .feed-item.kind-video .media-wrap {
-    width: fit-content; max-width: min(560px, 100%);
+    width: 100%; max-width: min(560px, 100%);
+    aspect-ratio: 16 / 9; max-height: 78vh;
     margin: 0 auto; border-radius: 12px; overflow: hidden;
     background: #0a0c12;
     box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
@@ -221,10 +224,12 @@
   .feed .feed-item.kind-video .feed-head { max-width: 560px; margin: 0 auto; }
   .feed .feed-item.kind-video { background: transparent; border: none; }
   .feed .feed-item.kind-video .play-overlay .circle { width: 54px; height: 54px; font-size: 20px; }
-  /* 播放器同样按原始尺寸展示，不放大 */
+  /* 封面与播放器都填满窗口，按比例完整显示（不裁剪、不拉伸） */
+  .feed .feed-item.kind-video .media-wrap img.video-cover,
   .feed .feed-item.kind-video .media-wrap video {
-    width: auto; max-width: 100%; height: auto; max-height: 70vh; display: block;
+    width: 100%; height: 100%; object-fit: contain; display: block; background: #000;
   }
+  .feed .feed-item.kind-video .media-wrap .no-cover { width: 100%; height: 100%; }
   .media-wrap video { width: 100%; height: auto; max-height: 82vh; display: block; background: #000; }
   .media-wrap audio { width: min(560px, 88%); margin: 24px auto; display: block; }
   .media-wrap canvas.audio-art { display: none; }
@@ -370,7 +375,7 @@
   </div>
 
   <div class="version">
-    <span id="modeText">管理模式</span> · 版本 v18 · 已开启防截屏保护
+    <span id="modeText">管理模式</span> · 版本 v19 · 已开启防截屏保护
   </div>
 </div>
 
@@ -1173,14 +1178,21 @@ async function loadFeedImage(item, wrap) {
   hint.remove();
 }
 
+// 按画面比例设定视频窗口尺寸：横屏窗口最宽 560，竖屏收窄到 360，避免出现超高的窗口
+function applyWrapAspect(wrap, w, h) {
+  if (!w || !h) return;
+  wrap.style.aspectRatio = w + ' / ' + h;
+  wrap.style.maxWidth = `min(${h > w ? 360 : 560}px, 100%)`;
+}
+
 async function playInFeed(item, wrap) {
   const kind = item.kind || typeKind(item.type) || 'image';
+  if (wrap.dataset.playing === '1') return; // 防止重复点击插入多个播放器
+  wrap.dataset.playing = '1';
   const overlay = wrap.querySelector('.play-overlay') || wrap.querySelector('.audio-card');
   if (overlay) overlay.remove();
-  // 播放器插入前先移除封面预览图，否则封面会盖在播放器上面
-  const cover = wrap.querySelector('.video-cover, .no-cover');
-  if (cover) cover.remove();
   const label = kind === 'video' ? '视频' : '音频';
+  // 加载期间保留封面，只叠加进度提示，避免窗口出现空白/塌陷
   const hint = mediaLoading(wrap, `正在加载${label}…`);
   const onProgress = (done, total) => {
     if (total > 1) hint.innerHTML = `<span class="spin" style="border-top-color:#6c8cff"></span>正在加载${label} ${done}/${total}`;
@@ -1189,13 +1201,18 @@ async function playInFeed(item, wrap) {
     const url = await getItemBlobURL(item, onProgress);
     hint.remove();
     wrap.classList.add('has-media');
+    // 数据就绪后再移除封面，紧接着插入播放器（中间不留空窗）
+    const cover = wrap.querySelector('.video-cover, .no-cover');
     if (kind === 'video') {
       const v = document.createElement('video');
       v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = 'auto';
+      if (cover) cover.replaceWith(v); else wrap.appendChild(v);
+      // 用视频真实比例修正窗口尺寸（竖屏视频也能正确显示）
+      v.addEventListener('loadedmetadata', () => applyWrapAspect(wrap, v.videoWidth, v.videoHeight));
       v.src = url;
-      wrap.appendChild(v);
       v.play().catch(() => {});
     } else {
+      if (cover) cover.remove();
       const a = document.createElement('audio');
       a.controls = true; a.autoplay = true; a.src = url;
       wrap.appendChild(a);
@@ -1203,6 +1220,7 @@ async function playInFeed(item, wrap) {
     }
   } catch (e) {
     console.error(e);
+    delete wrap.dataset.playing;
     hint.textContent = '加载失败，请刷新重试';
   }
 }
@@ -1238,6 +1256,12 @@ function renderFeed(items) {
     el.innerHTML = head + body;
 
     const wrap = el.querySelector('.media-wrap');
+    // 让视频窗口的比例跟随封面（竖屏作品也能正确显示），窗口因此始终有确定尺寸
+    if (kind === 'video' && item.thumb) {
+      const probe = new Image();
+      probe.onload = () => applyWrapAspect(wrap, probe.naturalWidth, probe.naturalHeight);
+      probe.src = item.thumb;
+    }
     if (kind === 'image') {
       if (feedObserver) feedObserver.observe(wrap); else loadFeedImage(item, wrap);
     } else {
